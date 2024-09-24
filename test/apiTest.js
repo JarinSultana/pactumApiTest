@@ -1,52 +1,161 @@
 const pactum = require('pactum');
 const { connect, disconnect } = require('mongoose');
+const { request } = require('pactum');
+const { stash, spec } = require('pactum');
+const chai = require('chai');
+const expect = chai.expect;
+const User = require('../models/User');
+const connectDB = require('../helper');
 pactum.settings.setLogLevel('DEBUG');
 
-const userEmail = 'jarinsama1@gmail.com';
-const userName = 'Jarin Sultana';
+
+request.setBaseUrl("http://localhost:3000"); 
+
+
+
+
 describe('API Integration Tests for User Endpoints', () => {
     before(async () => {
-        await connect('mongodb://localhost:27017/usersdb');
+        await connectDB();
+        await User.deleteMany({});
     });
 
-    it('should create a new user with POST /api/user', async () => {
-        await pactum.spec()
-            .post('http://localhost:3000/api/user')
-            .withJson({ name: userName, email: userEmail })
-            .expectStatus(201)
-            .expectJsonLike({
-                message: 'User created successfully',
-                user: { name: userName }
-            });
+    const data = [
+        {
+            "email": "zayeed@gmail.com", 
+            "name": "Zayeed"
+        },
+        {
+            "email": "jarin@gmail.com", 
+            "name": "Jarin Sultana"
+        },
+        {
+            "email": "John@gmail.com", 
+            "name": "John Abraham"
+        }
+    ];
+    
+
+    it('Create new Users', async () => {
+        for (const userData of data) {
+    
+        try {
+           
+            const existingUser = await User.findOne({ email: userData.email });
+            if (existingUser) {
+                throw new Error('User already exists');
+            }
+    
+          
+            const response = await pactum.spec()
+                .post('/api/user')
+                .withJson(userData)
+                .expectStatus(201)
+                .expectJsonMatch({
+                    "message": 'User created successfully',
+                    "user": {
+                        "name": userData.name 
+                    }
+                });
+    
+            
+            const createdUser = await User.findOne({ email: userData.email });
+            expect(createdUser).to.not.be.null;
+            expect(createdUser.name).to.equal(userData.name); 
+        } catch (error) {
+            console.error('Error occurred during the test:', error);
+            throw error; 
+        }
+    }
     });
 
-    it('should update user details with PUT /api/user/:email', async () => {
+    it('Retrieve Created Users', async () => {
+        for (const userData of data) {
+            try {
+                
+                const response = await pactum.spec()
+                    .get(`/api/user/${userData.email}`)
+                    .expectStatus(200)
+                    .expectJsonMatch({
+                        email: userData.email,
+                        name: userData.name
+                    });
+    
+               
+                const retrievedUser = await User.findOne({ email: userData.email });
+                expect(retrievedUser).to.not.be.null;
+                expect(retrievedUser.email).to.equal(userData.email); 
+                expect(retrievedUser.name).to.equal(userData.name); 
+    
+            } catch (error) {
+                console.error('Error occurred while retrieving user:', error);
+                throw error; 
+            }
+        }
+    });
+    
+    
+    it('Update User Name and Email', async () => {
+        const updatedData = {
+            "email": "updatedEmail@gmail.com", 
+            "name": "UpdatedName"
+        };
+        
         await pactum.spec()
-            .put(`http://localhost:3000/api/user/${userEmail}`)
-            .withJson({
-                name: 'Updated User',
-                email: 'updated.user@example.com'
-            })
+            .put(`/api/user/{email}`)
+            .withPathParams('email', 'John@gmail.com') 
             .expectStatus(200)
             .expectJsonLike({
-                message: 'User updated successfully',
-                user: { name: 'Updated User', email: 'updated.user@example.com' }
+                "message": 'User updated successfully',
+                "user": {
+                    "name": updatedData.name,
+                    "email": updatedData.email 
+                }
             });
+    
+     
+        const updatedUser = await User.findOne({ email: updatedData.email }); 
+        expect(updatedUser).to.not.be.null; 
+        expect(updatedUser.name).to.equal(updatedData.name); 
+        expect(updatedUser.email).to.equal(updatedData.email);
     });
 
-    it('should delete a user with DELETE /api/user/:email', async () => {
+    it('Delete a User', async () => {
         await pactum.spec()
-            .delete(`http://localhost:3000/api/user/${'updated.user@example.com'}`)
+            .delete('/api/user/{email}')
+            .withPathParams('email', 'updatedEmail@gmail.com')
             .expectStatus(200)
             .expectJson({ message: 'User deleted successfully' });
+
+            const deletedUser = await User.findOne({ email: 'updatedEmail@gmail.com' });
+            expect(deletedUser).to.be.null; 
     });
 
-    it('should return 404 for GET /api/user/:email after deletion', async () => {
+    it('Update Email Only ', async () => {
+        const updatedData = {
+            "email": "abc@gmail.com", 
+            "name": "Zayeed"
+        };
+        
         await pactum.spec()
-            .get(`http://localhost:3000/api/user/${'updated.user@example.com'}`)
-            .expectStatus(404)
-            .expectJson({ error: 'User not found' });
+            .patch('/api/user/{email}')
+            .withPathParams('email', 'zayeed@gmail.com')  
+            .withJson(updatedData)                      
+            .expectStatus(200)                          
+            .expectJsonLike({
+                "message": 'User partially updated successfully',
+                "user": {
+                    "name": updatedData.name,
+                    "email": updatedData.email
+                }
+            });
+
+            const updatedUser = await User.findOne({ email: updatedData.email });
+            expect(updatedUser).to.not.be.null; 
+            expect(updatedUser.name).to.equal(updatedData.name); 
+            expect(updatedUser.email).to.equal(updatedData.email);
     });
+    
 
     after(async () => {
         await disconnect();

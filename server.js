@@ -1,22 +1,17 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const mongoose = require('mongoose');
+const connectDB = require('./helper');
 
-// Connect to MongoDB (adjust the connection string if needed)
-mongoose.connect('mongodb://localhost:27017/usersdb', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('Connected to MongoDB');
-}).catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
-});
 
+require('./helper');  
 
 app.use(express.json());
 
 const User = require('./models/User');
+connectDB(); 
+
+
 
 // Dummy POST endpoint - create new user
 app.post('/api/user', async (req, res) => {
@@ -56,9 +51,9 @@ app.get('/api/user/:email', async (req, res) => {
 app.patch('/api/user/:email', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate(
-            { email: req.params.email },   // Query by email
-            req.body,                      // Update data
-            { new: true }                  // Return the updated user
+            { email: req.params.email },   
+            req.body,                      
+            { new: true }                  
         );
         if (updatedUser) {
             res.status(200).json({
@@ -73,6 +68,7 @@ app.patch('/api/user/:email', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+
 // PUT user by email
 app.put('/api/user/:email', async (req, res) => {
     try {
@@ -95,11 +91,10 @@ app.put('/api/user/:email', async (req, res) => {
     }
 });
 
-
 // DELETE user by email
 app.delete('/api/user/:email', async (req, res) => {
     try {
-        const deletedUser = await User.findOneAndDelete({ email: req.params.email }); // Query by email
+        const deletedUser = await User.findOneAndDelete({ email: req.params.email });
         if (deletedUser) {
             res.status(200).json({ message: 'User deleted successfully' });
         } else {
