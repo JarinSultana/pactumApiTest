@@ -56,7 +56,27 @@ describe('API Functional Test Scripts', () => {
                     "user": {
                         "name": userData.name 
                     }
-                });
+                })
+                .expectJsonSchema({
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "enum": ["User created successfully"]
+                      },
+                      "user": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["name"]
+                      }
+                    },
+                    "required": ["message", "user"]
+                  }
+                  );
     
             
             const createdUser = await User.findOne({ email: userData.email });
@@ -79,7 +99,21 @@ describe('API Functional Test Scripts', () => {
                     .expectJsonMatch({
                         email: userData.email,
                         name: userData.name
-                    });
+                    })
+                    .expectJsonSchema({
+                        "type": "object",
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["email", "name"]
+                      }
+                      );
     
                
                 const retrievedUser = await User.findOne({ email: userData.email });
@@ -111,7 +145,31 @@ describe('API Functional Test Scripts', () => {
                     "name": updatedData.name,
                     "email": updatedData.email 
                 }
-            });
+            })
+            .expectJsonSchema({
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "enum": ["User updated successfully"]
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    },
+                    "required": ["name", "email"]
+                  }
+                },
+                "required": ["message", "user"]
+              }
+              );
     
      
         const updatedUser = await User.findOne({ email: updatedData.email }); 
@@ -137,7 +195,31 @@ describe('API Functional Test Scripts', () => {
                     "name": updatedData.name,
                     "email": updatedData.email
                 }
-            });
+            })
+            .expectJsonSchema({
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "enum": ["User partially updated successfully"]
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    },
+                    "required": ["name", "email"]
+                  }
+                },
+                "required": ["message", "user"]
+              }
+              );
 
             const updatedUser = await User.findOne({ email: updatedData.email });
             expect(updatedUser).to.not.be.null; 
@@ -150,7 +232,18 @@ describe('API Functional Test Scripts', () => {
             .delete('/api/user/{email}')
             .withPathParams('email', 'updatedEmail@gmail.com')
             .expectStatus(200)
-            .expectJson({ message: 'User deleted successfully' });
+            .expectJson({ message: 'User deleted successfully' })
+            .expectJsonSchema({
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "enum": ["User deleted successfully"]
+                  }
+                },
+                "required": ["message"]
+              }
+              );
 
             const deletedUser = await User.findOne({ email: 'updatedEmail@gmail.com' });
             expect(deletedUser).to.be.null; 
@@ -158,6 +251,7 @@ describe('API Functional Test Scripts', () => {
     
 
     after(async () => {
+        // await User.deleteMany({});
         await disconnect();
     });
 
