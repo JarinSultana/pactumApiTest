@@ -6,6 +6,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const User = require('../models/User');
 const connectDB = require('../helper');
+const data = require('../UserData'); 
 pactum.settings.setLogLevel('DEBUG');
 
 
@@ -20,22 +21,8 @@ describe('API Functional Test Scripts', () => {
         await connectDB();
         await User.deleteMany({});
     });
-
-    const data = [
-        {
-            "email": "zayeed@gmail.com", 
-            "name": "Zayeed"
-        },
-        {
-            "email": "jarin@gmail.com", 
-            "name": "Jarin Sultana"
-        },
-        {
-            "email": "John@gmail.com", 
-            "name": "John Abraham"
-        }
-    ];
     
+    //Post Request
     it('Create new Users', async () => {
         for (const userData of data) {
     
@@ -88,7 +75,8 @@ describe('API Functional Test Scripts', () => {
         }
     }
     });
-
+     
+    //Get Request
     it('Retrieve Created Users', async () => {
         for (const userData of data) {
             try {
@@ -120,6 +108,7 @@ describe('API Functional Test Scripts', () => {
                 expect(retrievedUser).to.not.be.null;
                 expect(retrievedUser.email).to.equal(userData.email); 
                 expect(retrievedUser.name).to.equal(userData.name); 
+                console.log(response.body);
     
             } catch (error) {
                 console.error('Error occurred while retrieving user:', error);
@@ -128,6 +117,7 @@ describe('API Functional Test Scripts', () => {
         }
     });
     
+    //Put Request
     it('Update User Name and Email', async () => {
         const updatedData = {
             "email": "updatedEmail@gmail.com", 
@@ -177,7 +167,8 @@ describe('API Functional Test Scripts', () => {
         expect(updatedUser.name).to.equal(updatedData.name); 
         expect(updatedUser.email).to.equal(updatedData.email);
     });
-
+    
+    //Patch Request
     it('Update Email Only ', async () => {
         const updatedData = {
             "email": "abc@gmail.com", 
@@ -226,7 +217,8 @@ describe('API Functional Test Scripts', () => {
             expect(updatedUser.name).to.equal(updatedData.name); 
             expect(updatedUser.email).to.equal(updatedData.email);
     });
-
+    
+    //Delete Request
     it('Delete a User', async () => {
         await pactum.spec()
             .delete('/api/user/{email}')
