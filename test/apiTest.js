@@ -15,6 +15,7 @@ request.setBaseUrl("http://localhost:3000");
 
 
 describe('API Integration Tests for User Endpoints', () => {
+
     before(async () => {
         await connectDB();
         await User.deleteMany({});
@@ -35,7 +36,6 @@ describe('API Integration Tests for User Endpoints', () => {
         }
     ];
     
-
     it('Create new Users', async () => {
         for (const userData of data) {
     
@@ -94,7 +94,6 @@ describe('API Integration Tests for User Endpoints', () => {
         }
     });
     
-    
     it('Update User Name and Email', async () => {
         const updatedData = {
             "email": "updatedEmail@gmail.com", 
@@ -104,6 +103,7 @@ describe('API Integration Tests for User Endpoints', () => {
         await pactum.spec()
             .put(`/api/user/{email}`)
             .withPathParams('email', 'John@gmail.com') 
+            .withJson(updatedData)
             .expectStatus(200)
             .expectJsonLike({
                 "message": 'User updated successfully',
@@ -118,17 +118,6 @@ describe('API Integration Tests for User Endpoints', () => {
         expect(updatedUser).to.not.be.null; 
         expect(updatedUser.name).to.equal(updatedData.name); 
         expect(updatedUser.email).to.equal(updatedData.email);
-    });
-
-    it('Delete a User', async () => {
-        await pactum.spec()
-            .delete('/api/user/{email}')
-            .withPathParams('email', 'updatedEmail@gmail.com')
-            .expectStatus(200)
-            .expectJson({ message: 'User deleted successfully' });
-
-            const deletedUser = await User.findOne({ email: 'updatedEmail@gmail.com' });
-            expect(deletedUser).to.be.null; 
     });
 
     it('Update Email Only ', async () => {
@@ -155,10 +144,22 @@ describe('API Integration Tests for User Endpoints', () => {
             expect(updatedUser.name).to.equal(updatedData.name); 
             expect(updatedUser.email).to.equal(updatedData.email);
     });
-    
 
+    it('Delete a User', async () => {
+        await pactum.spec()
+            .delete('/api/user/{email}')
+            .withPathParams('email', 'updatedEmail@gmail.com')
+            .expectStatus(200)
+            .expectJson({ message: 'User deleted successfully' });
+
+            const deletedUser = await User.findOne({ email: 'updatedEmail@gmail.com' });
+            expect(deletedUser).to.be.null; 
+    });
+    
+    
     after(async () => {
         await disconnect();
     });
+
 });
 

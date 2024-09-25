@@ -1,0 +1,214 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 5,
+    "passes": 5,
+    "pending": 0,
+    "failures": 0,
+    "start": "2024-09-25T06:30:49.745Z",
+    "end": "2024-09-25T06:30:49.863Z",
+    "duration": 118,
+    "testsRegistered": 5,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "fb373632-151f-4461-82a5-b31a3bbc63b6",
+      "title": "",
+      "fullFile": "/home/syed/pactumApiTest/test/apiTest.js",
+      "file": "/test/apiTest.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+          "title": "API Integration Tests for User Endpoints",
+          "fullFile": "/home/syed/pactumApiTest/test/apiTest.js",
+          "file": "/test/apiTest.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"API Integration Tests for User Endpoints\"",
+              "fullTitle": "API Integration Tests for User Endpoints \"before all\" hook in \"API Integration Tests for User Endpoints\"",
+              "timedOut": false,
+              "duration": 35,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await connectDB();\nawait User.deleteMany({});",
+              "err": {},
+              "uuid": "23128074-8b53-4443-b873-aff9e5fb7895",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"API Integration Tests for User Endpoints\"",
+              "fullTitle": "API Integration Tests for User Endpoints \"after all\" hook in \"API Integration Tests for User Endpoints\"",
+              "timedOut": false,
+              "duration": 4,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await disconnect();",
+              "err": {},
+              "uuid": "70ec2f42-ef8b-467d-ba5e-33f9b84ed715",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "Create new Users",
+              "fullTitle": "API Integration Tests for User Endpoints Create new Users",
+              "timedOut": false,
+              "duration": 38,
+              "state": "passed",
+              "speed": "medium",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "for (const userData of data) {\n    \ntry {\n   \n    const existingUser = await User.findOne({ email: userData.email });\n    if (existingUser) {\n        throw new Error('User already exists');\n    }\n    \n  \n    const response = await pactum.spec()\n        .post('/api/user')\n        .withJson(userData)\n        .expectStatus(201)\n        .expectJsonMatch({\n            \"message\": 'User created successfully',\n            \"user\": {\n                \"name\": userData.name \n            }\n        });\n    \n    \n    const createdUser = await User.findOne({ email: userData.email });\n    expect(createdUser).to.not.be.null;\n    expect(createdUser.name).to.equal(userData.name); \n} catch (error) {\n    console.error('Error occurred during the test:', error);\n    throw error; \n}\n    }",
+              "err": {},
+              "uuid": "55f6bcad-749e-4edc-9d3c-7db94b8b6678",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Retrieve Created Users",
+              "fullTitle": "API Integration Tests for User Endpoints Retrieve Created Users",
+              "timedOut": false,
+              "duration": 16,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "for (const userData of data) {\n    try {\n        \n        const response = await pactum.spec()\n            .get(`/api/user/${userData.email}`)\n            .expectStatus(200)\n            .expectJsonMatch({\n                email: userData.email,\n                name: userData.name\n            });\n    \n       \n        const retrievedUser = await User.findOne({ email: userData.email });\n        expect(retrievedUser).to.not.be.null;\n        expect(retrievedUser.email).to.equal(userData.email); \n        expect(retrievedUser.name).to.equal(userData.name); \n    \n    } catch (error) {\n        console.error('Error occurred while retrieving user:', error);\n        throw error; \n    }\n}",
+              "err": {},
+              "uuid": "b19ff8e2-9426-4144-9de4-b3a9c8ec8e59",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Update User Name and Email",
+              "fullTitle": "API Integration Tests for User Endpoints Update User Name and Email",
+              "timedOut": false,
+              "duration": 6,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const updatedData = {\n    \"email\": \"updatedEmail@gmail.com\", \n    \"name\": \"UpdatedName\"\n};\n\nawait pactum.spec()\n    .put(`/api/user/{email}`)\n    .withPathParams('email', 'John@gmail.com') \n    .withJson(updatedData)\n    .expectStatus(200)\n    .expectJsonLike({\n        \"message\": 'User updated successfully',\n        \"user\": {\n            \"name\": updatedData.name,\n            \"email\": updatedData.email \n        }\n    });\n    \n     \nconst updatedUser = await User.findOne({ email: updatedData.email }); \nexpect(updatedUser).to.not.be.null; \nexpect(updatedUser.name).to.equal(updatedData.name); \nexpect(updatedUser.email).to.equal(updatedData.email);",
+              "err": {},
+              "uuid": "ab5cae66-f884-4c3d-a3cc-784a94069524",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Delete a User",
+              "fullTitle": "API Integration Tests for User Endpoints Delete a User",
+              "timedOut": false,
+              "duration": 5,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await pactum.spec()\n    .delete('/api/user/{email}')\n    .withPathParams('email', 'updatedEmail@gmail.com')\n    .expectStatus(200)\n    .expectJson({ message: 'User deleted successfully' });\n    const deletedUser = await User.findOne({ email: 'updatedEmail@gmail.com' });\n    expect(deletedUser).to.be.null;",
+              "err": {},
+              "uuid": "8e5a8243-fe0d-40bc-bf0f-dc4c014bdb16",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Update Email Only ",
+              "fullTitle": "API Integration Tests for User Endpoints Update Email Only ",
+              "timedOut": false,
+              "duration": 7,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const updatedData = {\n    \"email\": \"abc@gmail.com\", \n    \"name\": \"Zayeed\"\n};\n\nawait pactum.spec()\n    .patch('/api/user/{email}')\n    .withPathParams('email', 'zayeed@gmail.com')  \n    .withJson(updatedData)                      \n    .expectStatus(200)                          \n    .expectJsonLike({\n        \"message\": 'User partially updated successfully',\n        \"user\": {\n            \"name\": updatedData.name,\n            \"email\": updatedData.email\n        }\n    });\n    const updatedUser = await User.findOne({ email: updatedData.email });\n    expect(updatedUser).to.not.be.null; \n    expect(updatedUser.name).to.equal(updatedData.name); \n    expect(updatedUser.email).to.equal(updatedData.email);",
+              "err": {},
+              "uuid": "458fdd69-474e-4dc2-85b6-c39248d667a2",
+              "parentUUID": "9ede3226-f177-4899-a2de-5b55e21f1fec",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "55f6bcad-749e-4edc-9d3c-7db94b8b6678",
+            "b19ff8e2-9426-4144-9de4-b3a9c8ec8e59",
+            "ab5cae66-f884-4c3d-a3cc-784a94069524",
+            "8e5a8243-fe0d-40bc-bf0f-dc4c014bdb16",
+            "458fdd69-474e-4dc2-85b6-c39248d667a2"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 72,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 10000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 10000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "10.7.3"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": null,
+      "version": "6.2.0"
+    }
+  }
+}
