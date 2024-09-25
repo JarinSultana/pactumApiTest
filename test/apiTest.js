@@ -14,7 +14,7 @@ request.setBaseUrl("http://localhost:3000");
 
 
 
-describe('API Integration Tests for User Endpoints', () => {
+describe('API Functional Test Scripts', () => {
 
     before(async () => {
         await connectDB();
@@ -156,7 +156,7 @@ describe('API Integration Tests for User Endpoints', () => {
             expect(deletedUser).to.be.null; 
     });
     
-    
+
     after(async () => {
         await disconnect();
     });
