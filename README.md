@@ -6,6 +6,7 @@ If you’re looking to get started with API automation, PactumJS is a powerful y
 PactumJS is an open-source API testing framework designed for ease of use. Unlike other tools that require extensive setup, PactumJS allows you to write clear and concise test cases with minimal effort.
 
 Here’s what makes it stand out:
+
 ✅ Lightweight & Fast – No heavy dependencies, quick execution
 
 ✅ Expressive & Readable Syntax – Easy to write and understand tests
@@ -23,6 +24,7 @@ npm install --save-dev pactum
 
 ```
 ## What does this test cover?
+
 ✅ Creating a user with POST /api/user
 
 ✅ Updating user details with PUT /api/user/:email
@@ -33,6 +35,7 @@ npm install --save-dev pactum
 
 ## Advanced Features
 As you progress, PactumJS offers more powerful capabilities:
+
 🔹 Dynamic Data Handling – Easily test with different input values
 
 🔹 Chained API Requests – Simulate real-world workflows
